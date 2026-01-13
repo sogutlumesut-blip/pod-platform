@@ -1,0 +1,9 @@
+brain/
+.DS_Store
+*.log
+venv/
+node_modules/
+.env
+.env.local
+__pycache__/
+.pytest_cache/
