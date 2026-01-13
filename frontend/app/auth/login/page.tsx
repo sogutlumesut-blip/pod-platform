@@ -3,70 +3,66 @@
 import { Button } from "@/components/ui/button";
 import { Zap, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState<string | null>(null);
-    // Login State
-    const [emailState, setEmailState] = useState("");
+    const [email, setEmail] = useState("");
 
-    // Social Auth Dialog State
-    const [showSocialDialog, setShowSocialDialog] = useState(false);
-    const [socialProvider, setSocialProvider] = useState("");
-    const [socialData, setSocialData] = useState({ name: "", email: "" });
+    // Listen for popup messages
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            // Security check: ensure message is from our own origin
+            if (event.origin !== window.location.origin) return;
 
+            if (event.data.type === "GOOGLE_AUTH_SUCCESS") {
+                const { data } = event.data;
+                // Success!
+                toast({
+                    title: "Welcome back!",
+                    description: `Logged in as ${data.name} via Google.`,
+                });
 
-    const handleSocialClick = (provider: string) => {
-        setIsLoading(provider);
-        // Simulate "fetching" from provider
-        setTimeout(() => {
-            setIsLoading(null);
-            setSocialProvider(provider);
-            // Pre-fill with "fetched" data or leave empty for user to fill
-            setSocialData({
-                name: "Your Name",
-                email: `user@${provider.toLowerCase()}.com`
-            });
-            setShowSocialDialog(true);
-        }, 1000);
-    };
+                localStorage.setItem("user_session", JSON.stringify({
+                    isLoggedIn: true,
+                    provider: 'google',
+                    email: data.email,
+                    name: data.name
+                }));
 
-    const confirmSocialLogin = () => {
-        setIsLoading('confirm');
-        setTimeout(() => {
-            // Mock successful login with CONFIRMED data
-            toast({
-                title: "Welcome to PrintMarkt!",
-                description: `Account created with ${socialProvider}.`,
-            });
+                router.push("/dashboard");
+            }
+        };
 
-            localStorage.setItem("user_session", JSON.stringify({
-                isLoggedIn: true,
-                provider: socialProvider,
-                email: socialData.email,
-                name: socialData.name
-            }));
+        window.addEventListener("message", handleMessage);
+        return () => window.removeEventListener("message", handleMessage);
+    }, [router, toast]);
 
-            router.push("/dashboard");
-        }, 800);
+    const handleGoogleLogin = () => {
+        setIsLoading('Google');
+        // Open Popup
+        const width = 500;
+        const height = 600;
+        const left = window.screen.width / 2 - width / 2;
+        const top = window.screen.height / 2 - height / 2;
+
+        // Open the mock page we created
+        window.open(
+            '/auth/google-mock',
+            'google_login_popup',
+            `width=${width},height=${height},top=${top},left=${left},scrollbars=yes`
+        );
+
+        // Reset loading after a bit (assuming user sees popup)
+        setTimeout(() => setIsLoading(null), 2000);
     };
 
     const handleEmailLogin = async () => {
-        if (!emailState) {
+        if (!email) {
             toast({
                 title: "Email Required",
                 description: "Please enter your email address.",
@@ -87,13 +83,13 @@ export default function LoginPage() {
             });
 
             // Extract name from email for better UX
-            const derivedName = emailState.split('@')[0];
+            const derivedName = email.split('@')[0];
             const formattedName = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
 
             localStorage.setItem("user_session", JSON.stringify({
                 isLoggedIn: true,
                 provider: 'email',
-                email: emailState,
+                email: email,
                 name: formattedName
             }));
 
@@ -103,42 +99,6 @@ export default function LoginPage() {
 
     return (
         <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0 animate-in fade-in duration-500">
-            {/* Social Login Completion Dialog */}
-            <Dialog open={showSocialDialog} onOpenChange={setShowSocialDialog}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Complete your account</DialogTitle>
-                        <DialogDescription>
-                            We successfully connected to {socialProvider}. Please confirm your details to finish setup.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Full Name</Label>
-                            <Input
-                                id="name"
-                                value={socialData.name}
-                                onChange={(e) => setSocialData({ ...socialData, name: e.target.value })}
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email Address</Label>
-                            <Input
-                                id="email"
-                                value={socialData.email}
-                                onChange={(e) => setSocialData({ ...socialData, email: e.target.value })}
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button onClick={confirmSocialLogin} disabled={isLoading === 'confirm'}>
-                            {isLoading === 'confirm' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Create Account
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
             <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
                 <div className="absolute inset-0 bg-zinc-900" />
                 <div className="relative z-20 flex items-center text-lg font-medium">
@@ -180,8 +140,8 @@ export default function LoginPage() {
                                         autoComplete="email"
                                         autoCorrect="off"
                                         disabled={isLoading !== null}
-                                        value={emailState}
-                                        onChange={(e) => setEmailState(e.target.value)}
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
                                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                     />
                                 </div>
@@ -206,7 +166,7 @@ export default function LoginPage() {
                         </div>
 
                         <div className="grid gap-2">
-                            <Button variant="outline" type="button" disabled={isLoading !== null} onClick={() => handleSocialClick('Google')}>
+                            <Button variant="outline" type="button" disabled={isLoading === 'Google'} onClick={handleGoogleLogin}>
                                 {isLoading === 'Google' ? (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 ) : (
@@ -231,14 +191,10 @@ export default function LoginPage() {
                                 )}
                                 Google
                             </Button>
-                            <Button variant="outline" type="button" disabled={isLoading !== null} onClick={() => handleSocialClick('Facebook')}>
-                                {isLoading === 'Facebook' ? (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                    <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036c-2.048 0-2.733.984-2.733 2.582v1.39h4.525l-.665 3.667h-3.86v7.98h-5.08z" />
-                                    </svg>
-                                )}
+                            <Button variant="outline" type="button" disabled>
+                                <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036c-2.048 0-2.733.984-2.733 2.582v1.39h4.525l-.665 3.667h-3.86v7.98h-5.08z" />
+                                </svg>
                                 Facebook
                             </Button>
                         </div>
