@@ -3,13 +3,30 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, ChevronRight, FileText, Info, AlertCircle, ShoppingCart, Store } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
+    const [userName, setUserName] = useState("User");
+
+    useEffect(() => {
+        const session = localStorage.getItem("user_session");
+        if (session) {
+            try {
+                const user = JSON.parse(session);
+                if (user.name) {
+                    setUserName(user.name);
+                }
+            } catch (e) {
+                console.error("Failed to parse user session");
+            }
+        }
+    }, []);
+
     return (
         <div className="p-8 max-w-6xl mx-auto space-y-8">
             {/* Welcome Header */}
             <div className="space-y-2">
-                <h1 className="text-3xl font-bold">Welcome to PrintMarkt, User Name</h1>
+                <h1 className="text-3xl font-bold">Welcome to PrintMarkt, {userName}</h1>
                 <p className="text-muted-foreground">Here is what is happening with your store today.</p>
             </div>
 

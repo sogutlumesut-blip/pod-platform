@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const sidebarItems = [
     { icon: Home, label: "Home", href: "/dashboard" },
@@ -30,6 +30,24 @@ const sidebarItems = [
 export function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
+    const [user, setUser] = useState<{ name: string, email: string }>({ name: "User Name", email: "user@example.com" });
+
+    useEffect(() => {
+        const session = localStorage.getItem("user_session");
+        if (session) {
+            try {
+                const userData = JSON.parse(session);
+                if (userData) {
+                    setUser({
+                        name: userData.name || "User Name",
+                        email: userData.email || "user@example.com"
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to parse user session");
+            }
+        }
+    }, []);
 
     return (
         <div className={cn("flex flex-col border-r bg-background h-screen sticky top-0 transition-all duration-300", collapsed ? "w-[60px]" : "w-[240px]")}>
@@ -74,12 +92,12 @@ export function Sidebar() {
             <div className="p-4 border-t">
                 <div className={cn("flex items-center gap-3", collapsed ? "justify-center" : "")}>
                     <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                        <span className="font-bold text-xs">US</span>
+                        <span className="font-bold text-xs">{user.name.charAt(0)}</span>
                     </div>
                     {!collapsed && (
                         <div className="flex flex-col overflow-hidden">
-                            <span className="text-sm font-medium truncate">User Name</span>
-                            <span className="text-xs text-muted-foreground truncate">user@example.com</span>
+                            <span className="text-sm font-medium truncate">{user.name}</span>
+                            <span className="text-xs text-muted-foreground truncate">{user.email}</span>
                         </div>
                     )}
                 </div>
