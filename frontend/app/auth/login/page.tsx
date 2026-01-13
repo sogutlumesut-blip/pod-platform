@@ -6,15 +6,67 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState<string | null>(null);
-    const [email, setEmail] = useState("");
+    // Login State
+    const [emailState, setEmailState] = useState("");
 
-    const handleLogin = async (provider: string) => {
-        if (provider === 'email' && !email) {
+    // Social Auth Dialog State
+    const [showSocialDialog, setShowSocialDialog] = useState(false);
+    const [socialProvider, setSocialProvider] = useState("");
+    const [socialData, setSocialData] = useState({ name: "", email: "" });
+
+
+    const handleSocialClick = (provider: string) => {
+        setIsLoading(provider);
+        // Simulate "fetching" from provider
+        setTimeout(() => {
+            setIsLoading(null);
+            setSocialProvider(provider);
+            // Pre-fill with "fetched" data or leave empty for user to fill
+            setSocialData({
+                name: "Your Name",
+                email: `user@${provider.toLowerCase()}.com`
+            });
+            setShowSocialDialog(true);
+        }, 1000);
+    };
+
+    const confirmSocialLogin = () => {
+        setIsLoading('confirm');
+        setTimeout(() => {
+            // Mock successful login with CONFIRMED data
+            toast({
+                title: "Welcome to PrintMarkt!",
+                description: `Account created with ${socialProvider}.`,
+            });
+
+            localStorage.setItem("user_session", JSON.stringify({
+                isLoggedIn: true,
+                provider: socialProvider,
+                email: socialData.email,
+                name: socialData.name
+            }));
+
+            router.push("/dashboard");
+        }, 800);
+    };
+
+    const handleEmailLogin = async () => {
+        if (!emailState) {
             toast({
                 title: "Email Required",
                 description: "Please enter your email address.",
@@ -23,24 +75,26 @@ export default function LoginPage() {
             return;
         }
 
-        setIsLoading(provider);
+        setIsLoading('email');
 
         // Simulate network delay
         setTimeout(() => {
             setIsLoading(null);
 
-            // Mock successful login
             toast({
                 title: "Login Successful",
-                description: `Welcome back! Logged in with ${provider}.`,
+                description: `Welcome back!`,
             });
 
-            // In a real app, we would set a cookie or token here
+            // Extract name from email for better UX
+            const derivedName = emailState.split('@')[0];
+            const formattedName = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
+
             localStorage.setItem("user_session", JSON.stringify({
                 isLoggedIn: true,
-                provider: provider,
-                email: email || "demo@example.com",
-                name: "Demo User"
+                provider: 'email',
+                email: emailState,
+                name: formattedName
             }));
 
             router.push("/dashboard");
@@ -49,6 +103,42 @@ export default function LoginPage() {
 
     return (
         <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0 animate-in fade-in duration-500">
+            {/* Social Login Completion Dialog */}
+            <Dialog open={showSocialDialog} onOpenChange={setShowSocialDialog}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Complete your account</DialogTitle>
+                        <DialogDescription>
+                            We successfully connected to {socialProvider}. Please confirm your details to finish setup.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="name">Full Name</Label>
+                            <Input
+                                id="name"
+                                value={socialData.name}
+                                onChange={(e) => setSocialData({ ...socialData, name: e.target.value })}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="email">Email Address</Label>
+                            <Input
+                                id="email"
+                                value={socialData.email}
+                                onChange={(e) => setSocialData({ ...socialData, email: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={confirmSocialLogin} disabled={isLoading === 'confirm'}>
+                            {isLoading === 'confirm' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Create Account
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
                 <div className="absolute inset-0 bg-zinc-900" />
                 <div className="relative z-20 flex items-center text-lg font-medium">
@@ -76,7 +166,7 @@ export default function LoginPage() {
                     </div>
 
                     <div className="grid gap-6">
-                        <form onSubmit={(e) => { e.preventDefault(); handleLogin('email'); }}>
+                        <form onSubmit={(e) => { e.preventDefault(); handleEmailLogin(); }}>
                             <div className="grid gap-2">
                                 <div className="grid gap-1">
                                     <label className="sr-only" htmlFor="email">
@@ -90,8 +180,8 @@ export default function LoginPage() {
                                         autoComplete="email"
                                         autoCorrect="off"
                                         disabled={isLoading !== null}
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        value={emailState}
+                                        onChange={(e) => setEmailState(e.target.value)}
                                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                     />
                                 </div>
@@ -116,7 +206,7 @@ export default function LoginPage() {
                         </div>
 
                         <div className="grid gap-2">
-                            <Button variant="outline" type="button" disabled={isLoading !== null} onClick={() => handleLogin('Google')}>
+                            <Button variant="outline" type="button" disabled={isLoading !== null} onClick={() => handleSocialClick('Google')}>
                                 {isLoading === 'Google' ? (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 ) : (
@@ -141,7 +231,7 @@ export default function LoginPage() {
                                 )}
                                 Google
                             </Button>
-                            <Button variant="outline" type="button" disabled={isLoading !== null} onClick={() => handleLogin('Facebook')}>
+                            <Button variant="outline" type="button" disabled={isLoading !== null} onClick={() => handleSocialClick('Facebook')}>
                                 {isLoading === 'Facebook' ? (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 ) : (
