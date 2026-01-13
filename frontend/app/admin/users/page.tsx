@@ -15,36 +15,35 @@ const mockUsers = [
 ];
 
 export default function AdminUsersPage() {
-    const [users, setUsers] = useState(mockUsers);
+    const [users, setUsers] = useState<any[]>(mockUsers);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const handleActivate = async (id: number) => {
-        // Optimistic update
-        setUsers(users.map(u => u.id === id ? { ...u, is_active: true } : u));
-        try {
-            await fetch(`${API_URL}/admin/users/${id}/activate`, { method: 'POST' });
-            // Refresh logic would go here
-            console.log("Activated user", id);
-        } catch (e) {
-            console.error(e);
+    // Load registered users from localStorage (Mock Backend)
+    useEffect(() => {
+        const storedUsers = localStorage.getItem('mock_users');
+        if (storedUsers) {
+            try {
+                const parsed = JSON.parse(storedUsers);
+                // Merge or append. We'll simply append them to the mock list for display.
+                // In a real app, the API would return all of them.
+                setUsers(prev => [...prev, ...parsed]);
+            } catch (e) {
+                console.error("Failed to parse mock users", e);
+            }
         }
+    }, []);
+
+    const handleActivate = async (id: number | string) => {
+        setUsers(users.map(u => u.id === id ? { ...u, is_active: true } : u));
     };
 
-    const handleDeactivate = async (id: number) => {
-        // Optimistic update
+    const handleDeactivate = async (id: number | string) => {
         setUsers(users.map(u => u.id === id ? { ...u, is_active: false } : u));
-        try {
-            await fetch(`${API_URL}/admin/users/${id}/deactivate`, { method: 'POST' });
-            // Refresh logic would go here
-            console.log("Deactivated user", id);
-        } catch (e) {
-            console.error(e);
-        }
     };
 
     const filteredUsers = users.filter(user =>
-        user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -52,7 +51,7 @@ export default function AdminUsersPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900">User Management</h1>
-                    <p className="text-slate-500">Manage user access and account status.</p>
+                    <p className="text-slate-500">View registered customers and their details.</p>
                 </div>
                 <div className="relative w-72">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
@@ -71,6 +70,7 @@ export default function AdminUsersPage() {
                         <TableRow>
                             <TableHead>Full Name</TableHead>
                             <TableHead>Email</TableHead>
+                            <TableHead>Phone</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Joined</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
@@ -79,16 +79,17 @@ export default function AdminUsersPage() {
                     <TableBody>
                         {filteredUsers.map((user) => (
                             <TableRow key={user.id}>
-                                <TableCell className="font-medium">{user.full_name}</TableCell>
+                                <TableCell className="font-medium">{user.full_name || user.name}</TableCell>
                                 <TableCell>{user.email}</TableCell>
+                                <TableCell>{user.phone || "-"}</TableCell>
                                 <TableCell>
-                                    <Badge variant={user.is_active ? "default" : "secondary"} className={user.is_active ? "bg-green-500 hover:bg-green-600" : "bg-slate-200 text-slate-700 hover:bg-slate-300"}>
-                                        {user.is_active ? "Active" : "Inactive"}
+                                    <Badge variant={user.is_active || user.status === 'active' ? "default" : "secondary"} className={user.is_active || user.status === 'active' ? "bg-green-500 hover:bg-green-600" : "bg-slate-200 text-slate-700 hover:bg-slate-300"}>
+                                        {user.is_active || user.status === 'active' ? "Active" : "Inactive"}
                                     </Badge>
                                 </TableCell>
-                                <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(user.created_at || user.date).toLocaleDateString()}</TableCell>
                                 <TableCell className="text-right">
-                                    {user.is_active ? (
+                                    {(user.is_active || user.status === 'active') ? (
                                         <Button variant="ghost" size="sm" onClick={() => handleDeactivate(user.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50">
                                             <XCircle className="h-4 w-4 mr-1" /> Deactivate
                                         </Button>

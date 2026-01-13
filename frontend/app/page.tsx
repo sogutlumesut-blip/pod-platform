@@ -52,14 +52,17 @@ export default function Home() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="text-slate-700 hover:text-[#FF6B55]">
+              <Search className="h-5 w-5" />
+            </Button>
             <Link href="/auth/login">
-              <Button variant="ghost" className="font-semibold text-slate-700 hover:text-[#FF6B55] hover:bg-orange-50">
+              <Button variant="outline" className="font-semibold text-slate-700 border-slate-300 hover:bg-slate-50 hover:text-slate-900 px-6">
                 Log In
               </Button>
             </Link>
             <Link href="/auth/register">
               <Button className="font-bold bg-[#FF6B55] hover:bg-[#FF6B55]/90 text-white px-6 shadow-md shadow-orange-500/10">
-                Start Selling
+                Sign Up
               </Button>
             </Link>
           </div>
