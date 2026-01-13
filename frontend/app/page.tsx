@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Box, Check, Palette, Rocket, Zap, Search, Menu, Printer, Globe, Leaf } from "lucide-react";
+import { ArrowRight, Box, Check, Palette, Rocket, Zap, Search, Menu, Printer, Globe, Leaf, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -219,7 +219,7 @@ export default function Home() {
                 <div className="h-64 bg-slate-100 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-teal-50 group-hover:scale-105 transition-transform duration-500"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Image className="h-16 w-16 text-slate-300" />
+                    <ImageIcon className="h-16 w-16 text-slate-300" />
                   </div>
                 </div>
                 <div className="p-8">

@@ -3,6 +3,7 @@ echo "Git deposu duzeltiliyor..."
 
 # 1. Frontend icindeki .git klasorunu sil (varsa)
 rm -rf frontend/.git
+rm -f .gitmodules
 
 # 2. Git cache'den frontend'i sil (dosyalari silmez, sadece takibi birakir)
 git rm --cached frontend 2>/dev/null
