@@ -9,7 +9,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ProductCalculatorV2 } from "@/components/dashboard/ProductCalculatorV2";
+import { ProductCalculatorV2, ProductData } from "@/components/dashboard/ProductCalculatorV2";
 import { useState } from "react";
 
 interface OrderConfigurationDialogProps {
@@ -26,8 +26,24 @@ export function OrderConfigurationDialog({
     onConfirm,
 }: OrderConfigurationDialogProps) {
 
+    const [data, setData] = useState<ProductData>({
+        stockCode: "",
+        width: "",
+        height: "",
+        quantity: "1",
+        selectedTexture: "",
+        unit: "CM",
+        totalPrice: null,
+        selectedImage: null,
+        shippingMethod: null,
+        shippingCost: 0,
+        productionMethod: 'upload',
+        productionExternalUrl: ''
+    });
+
     const handleSave = () => {
         // In a real app, this would gather state from the calculator
+        console.log("Saving configuration:", data);
         onConfirm();
         onOpenChange(false);
     };
@@ -44,7 +60,7 @@ export function OrderConfigurationDialog({
 
                 <div className="flex-1 overflow-auto p-4 md:p-5 bg-slate-50/50 dark:bg-slate-900/20">
                     <div className="w-full">
-                        <ProductCalculatorV2 />
+                        <ProductCalculatorV2 data={data} onChange={setData} />
                     </div>
                 </div>
 
