@@ -1,24 +1,30 @@
 "use client";
 
-import { User } from "lucide-react";
+import { User, ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function GoogleMockPage() {
+    const [view, setView] = useState<'list' | 'login'>('list');
+    const [manualEmail, setManualEmail] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
     // Mock accounts based on user's screenshot
     const accounts = [
         { name: "Duvar Kağıdı Marketi", email: "sogutlumesut@gmail.com", avatar: "D", color: "bg-red-600" },
         { name: "Muravie Wallposter", email: "muraviewallposter@gmail.com", avatar: "M", color: "bg-orange-500" },
-        { name: "Dudu Tenger", email: "dudutengersogutlu@gmail.com", avatar: "D", color: "bg-purple-500" }, // Using avatar from screenshot
+        { name: "Dudu Tenger", email: "dudutengersogutlu@gmail.com", avatar: "D", color: "bg-purple-500" },
         { name: "Mesut Sogutlu", email: "mesutsogutlu@gmail.com", avatar: "M", color: "bg-blue-500" },
     ];
 
-    const handleSelectAccount = (account: any) => {
-        // Send message to parent window
+    const finishLogin = (data: { name: string, email: string }) => {
         if (window.opener) {
             window.opener.postMessage(
                 {
                     type: "GOOGLE_AUTH_SUCCESS",
                     provider: "google",
-                    data: account
+                    data: data
                 },
                 window.location.origin
             );
@@ -26,6 +32,21 @@ export default function GoogleMockPage() {
         } else {
             console.error("No parent window found!");
         }
+    };
+
+    const handleManualLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!manualEmail) return;
+
+        setIsLoading(true);
+        setTimeout(() => {
+            // Simple logic to guess name from email
+            const name = manualEmail.split("@")[0];
+            finishLogin({
+                name: name,
+                email: manualEmail
+            });
+        }, 1500);
     };
 
     return (
@@ -57,37 +78,94 @@ export default function GoogleMockPage() {
 
             <div className="flex-1 flex flex-col items-center justify-start pt-16 px-4">
                 <div className="w-full max-w-[400px] space-y-8">
-                    <div className="space-y-2">
-                        <h1 className="text-3xl font-normal text-[#e8eaed]">Bir hesap seçin</h1>
-                        <p className="text-[#9aa0a6]">printmarkt.com uygulamasına devam edin</p>
-                    </div>
 
-                    <div className="space-y-1">
-                        {accounts.map((acc, idx) => (
-                            <div
-                                key={acc.email}
-                                onClick={() => handleSelectAccount(acc)}
-                                className="flex items-center gap-4 p-4 hover:bg-[#303134] rounded transition-colors cursor-pointer border-b border-[#3c4043] last:border-0"
-                            >
-                                <div className={`h-8 w-8 rounded-full ${acc.color} flex items-center justify-center text-white text-sm font-medium shrink-0`}>
-                                    {acc.avatar}
-                                </div>
-                                <div className="flex flex-col text-left overflow-hidden">
-                                    <span className="text-[#e8eaed] text-sm font-medium truncate">{acc.name}</span>
-                                    <span className="text-[#9aa0a6] text-xs truncate">{acc.email}</span>
-                                </div>
+                    {view === 'list' ? (
+                        <>
+                            <div className="space-y-2">
+                                <h1 className="text-3xl font-normal text-[#e8eaed]">Bir hesap seçin</h1>
+                                <p className="text-[#9aa0a6]">printmarkt.com uygulamasına devam edin</p>
                             </div>
-                        ))}
 
-                        <div className="flex items-center gap-4 p-4 hover:bg-[#303134] rounded transition-colors cursor-pointer border-t border-[#3c4043] mt-2">
-                            <div className="h-8 w-8 rounded-full bg-transparent flex items-center justify-center text-[#9aa0a6]">
-                                <User className="h-5 w-5" />
+                            <div className="space-y-1">
+                                {accounts.map((acc) => (
+                                    <div
+                                        key={acc.email}
+                                        onClick={() => finishLogin(acc)}
+                                        className="flex items-center gap-4 p-4 hover:bg-[#303134] rounded transition-colors cursor-pointer border-b border-[#3c4043] last:border-0"
+                                    >
+                                        <div className={`h-8 w-8 rounded-full ${acc.color} flex items-center justify-center text-white text-sm font-medium shrink-0`}>
+                                            {acc.avatar}
+                                        </div>
+                                        <div className="flex flex-col text-left overflow-hidden">
+                                            <span className="text-[#e8eaed] text-sm font-medium truncate">{acc.name}</span>
+                                            <span className="text-[#9aa0a6] text-xs truncate">{acc.email}</span>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <div
+                                    onClick={() => setView('login')}
+                                    className="flex items-center gap-4 p-4 hover:bg-[#303134] rounded transition-colors cursor-pointer border-t border-[#3c4043] mt-2"
+                                >
+                                    <div className="h-8 w-8 rounded-full bg-transparent flex items-center justify-center text-[#9aa0a6]">
+                                        <User className="h-5 w-5" />
+                                    </div>
+                                    <div className="flex flex-col text-left">
+                                        <span className="text-[#e8eaed] text-sm font-medium">Başka bir hesap kullan</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex flex-col text-left">
-                                <span className="text-[#e8eaed] text-sm font-medium">Başka bir hesap kullan</span>
+                        </>
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="space-y-2 text-center">
+                                <h1 className="text-2xl font-normal text-[#e8eaed]">Oturum aç</h1>
+                                <p className="text-[#9aa0a6]">Google Hesabınızı kullanın</p>
                             </div>
+
+                            <form onSubmit={handleManualLogin} className="space-y-8">
+                                <div className="space-y-4">
+                                    <div className="relative">
+                                        <Input
+                                            type="email"
+                                            value={manualEmail}
+                                            onChange={(e) => setManualEmail(e.target.value)}
+                                            className="bg-transparent border-[#5f6368] text-[#e8eaed] h-14 px-4 rounded focus:border-[#8ab4f8] focus:ring-1 focus:ring-[#8ab4f8] transition-colors peer placeholder:text-transparent"
+                                            placeholder="E-posta veya telefon"
+                                            required
+                                        />
+                                        <label className={`absolute left-4 px-1 transition-all pointer-events-none bg-[#202124] ${manualEmail ? '-top-2.5 text-xs text-[#8ab4f8]' : 'top-4 text-[#9aa0a6]'}`}>
+                                            E-posta veya telefon
+                                        </label>
+                                    </div>
+                                    <button type="button" className="text-[#8ab4f8] text-sm font-medium hover:text-[#d2e3fc]">
+                                        E-posta adresinizi mi unuttunuz?
+                                    </button>
+                                </div>
+
+                                <div className="text-[#9aa0a6] text-sm">
+                                    Bilgisayarınız size ait değil mi? Gizli oturum açmak için Misafir modunu kullanın. <a href="#" className="text-[#8ab4f8]">Daha fazla bilgi</a>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setView('list')}
+                                        className="text-[#8ab4f8] font-medium text-sm hover:text-[#d2e3fc]"
+                                    >
+                                        Hesap oluşturun
+                                    </button>
+                                    <Button
+                                        type="submit"
+                                        className="bg-[#8ab4f8] text-[#202124] hover:bg-[#d2e3fc] px-6 font-medium"
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading ? 'İşleniyor...' : 'İleri'}
+                                    </Button>
+                                </div>
+                            </form>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>
