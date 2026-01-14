@@ -87,7 +87,8 @@ export default function RegisterPage() {
                 isLoggedIn: true,
                 provider: 'email',
                 email: formData.email,
-                name: formData.fullName
+                name: formData.fullName,
+                phone: formData.phone
             }));
 
             toast({
