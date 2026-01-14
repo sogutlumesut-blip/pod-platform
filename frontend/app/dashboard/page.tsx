@@ -36,9 +36,11 @@ export default function DashboardPage() {
                     <AlertCircle className="h-5 w-5" />
                     <span className="font-medium">Set up your account</span>
                 </div>
-                <Button variant="ghost" size="sm" className="text-red-700 dark:text-red-400 hover:text-red-800 hover:bg-red-100 dark:hover:bg-red-900">
-                    <ChevronRight className="h-5 w-5" />
-                </Button>
+                <Link href="/dashboard/settings">
+                    <Button variant="ghost" size="sm" className="text-red-700 dark:text-red-400 hover:text-red-800 hover:bg-red-100 dark:hover:bg-red-900">
+                        <ChevronRight className="h-5 w-5" />
+                    </Button>
+                </Link>
             </div>
 
             {/* Onboarding Checklist */}

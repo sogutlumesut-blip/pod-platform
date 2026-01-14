@@ -24,16 +24,63 @@ import { Info } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { CreditCard, Plus, Trash2, CheckCircle2 } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function SettingsPage() {
     const { toast } = useToast();
     const [countryCode, setCountryCode] = useState("+1");
+
+    // Form State
     const [formData, setFormData] = useState({
         storeName: "",
         fullName: "",
         email: "",
         phone: "",
+        storeNamePersistent: "" // To track if store name is actually saved
     });
+
+    // Billing State
+    const [billingData, setBillingData] = useState({
+        country: "",
+        state: "",
+        city: "",
+        zip: "",
+        address1: "",
+        address2: ""
+    });
+
+    // Payment State
+    const [paymentMethod, setPaymentMethod] = useState<any>(null);
+    const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+    const [newCard, setNewCard] = useState({
+        holderName: "",
+        cardNumber: "",
+        expiry: "",
+        cvv: ""
+    });
+
+    // Validates if the "Account Setup" is complete
+    const isSetupComplete = () => {
+        return (
+            formData.storeName &&
+            formData.fullName &&
+            formData.phone &&
+            billingData.country &&
+            billingData.address1 &&
+            billingData.city &&
+            billingData.zip &&
+            paymentMethod
+        );
+    };
 
     useEffect(() => {
         // Load user session on mount
@@ -41,18 +88,30 @@ export default function SettingsPage() {
         if (session) {
             try {
                 const userData = JSON.parse(session);
+
+                // Load basic info
                 setFormData(prev => ({
                     ...prev,
                     fullName: userData.name || "",
                     email: userData.email || "",
                     phone: userData.phone || "",
-                    storeName: userData.storeName || ""
+                    storeName: userData.storeName || "",
+                    storeNamePersistent: userData.storeName || ""
                 }));
+
+                // Load Billing Info if exists
+                if (userData.billing) {
+                    setBillingData(userData.billing);
+                }
+
+                // Load Payment Method if exists
+                if (userData.paymentMethod) {
+                    setPaymentMethod(userData.paymentMethod);
+                }
+
                 // Load saved country code or default to +1
                 if (userData.countryCode) {
                     setCountryCode(userData.countryCode);
-                } else if (!userData.countryCode && userData.phone && userData.phone.startsWith("+")) {
-                    // Fallback: If no countryCode but phone has +, try to guess (optional, keeping simple for now)
                 }
             } catch (e) {
                 console.error("Failed to parse user session");
@@ -65,8 +124,54 @@ export default function SettingsPage() {
         setFormData(prev => ({ ...prev, [id]: value }));
     };
 
+    const handleBillingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setBillingData(prev => ({ ...prev, [id]: value }));
+    };
+
+    const handleBillingSelectChange = (field: string, value: string) => {
+        setBillingData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleAddCard = () => {
+        // Simple validation
+        if (!newCard.cardNumber || !newCard.expiry || !newCard.cvv || !newCard.holderName) {
+            toast({ title: "Error", description: "Please fill all card details", variant: "destructive" });
+            return;
+        }
+
+        // Mock saving card (In reality, send to Stripe/Provider and get token)
+        const maskedCard = {
+            id: Date.now(),
+            brand: "Visa", // Mock detection
+            last4: newCard.cardNumber.slice(-4),
+            expiry: newCard.expiry,
+            holder: newCard.holderName
+        };
+
+        setPaymentMethod(maskedCard);
+        setIsPaymentDialogOpen(false);
+        setNewCard({ holderName: "", cardNumber: "", expiry: "", cvv: "" }); // Reset form
+
+        toast({ title: "Card Added", description: `Visa ending in ${maskedCard.last4} attached.` });
+    };
+
+    const handleRemoveCard = () => {
+        setPaymentMethod(null);
+    };
+
     const handleSave = () => {
-        // Update local storage to persist changes
+        // Validation: Check if everything is filled
+        if (!isSetupComplete()) {
+            toast({
+                title: "Incomplete Setup",
+                description: "Please fill in all Contact, Billing, and Payment details to complete your account setup.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        // Update local storage
         const currentSession = localStorage.getItem("user_session");
         if (currentSession) {
             const userData = JSON.parse(currentSession);
@@ -76,19 +181,23 @@ export default function SettingsPage() {
                 email: formData.email,
                 phone: formData.phone,
                 countryCode: countryCode,
-                storeName: formData.storeName
+                storeName: formData.storeName,
+                billing: billingData,
+                paymentMethod: paymentMethod,
+                isAccountSetupComplete: true // Flag for Dashboard
             };
             localStorage.setItem("user_session", JSON.stringify(updatedData));
 
-            // Also trigger a custom event or let Sidebar know (Sidebar polls or we reload)
-            // For now just toast
             toast({
-                title: "Settings Saved",
-                description: "Your profile information has been updated.",
+                title: "Membership Completed! 🎉",
+                description: "Your account is fully set up and ready to receive orders.",
+                className: "bg-green-600 text-white border-none"
             });
 
-            // Force reload to update sidebar name immediately if changed
-            window.location.reload();
+            // Force reload to update sidebar and dashboard state
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         }
     };
 
@@ -229,7 +338,7 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label className="text-xs font-bold text-[#FF7D5F] uppercase tracking-wide">Country *</Label>
-                        <Select>
+                        <Select value={billingData.country} onValueChange={(val) => handleBillingSelectChange("country", val)}>
                             <SelectTrigger className="h-12">
                                 <SelectValue placeholder="Select country" />
                             </SelectTrigger>
@@ -237,45 +346,119 @@ export default function SettingsPage() {
                                 <SelectItem value="us">United States</SelectItem>
                                 <SelectItem value="tr">Turkey</SelectItem>
                                 <SelectItem value="uk">United Kingdom</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">State</Label>
-                        <Select disabled>
-                            <SelectTrigger className="h-12 bg-muted/20">
-                                <SelectValue placeholder="" />
-                            </SelectTrigger>
-                            <SelectContent>
+                                <SelectItem value="de">Germany</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">City</Label>
-                        <Input className="h-12" />
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">City *</Label>
+                        <Input id="city" value={billingData.city} onChange={handleBillingChange} className="h-12" />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Zip / Postal Code</Label>
-                        <Input className="h-12" />
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Zip / Postal Code *</Label>
+                        <Input id="zip" value={billingData.zip} onChange={handleBillingChange} className="h-12" />
                     </div>
                     <div className="md:col-span-2 space-y-2">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Address Line 1</Label>
-                        <Input className="h-12" />
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Address Line 1 *</Label>
+                        <Input id="address1" value={billingData.address1} onChange={handleBillingChange} className="h-12" />
                     </div>
                     <div className="md:col-span-2 space-y-2">
                         <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Address Line 2 (Optional)</Label>
-                        <Input className="h-12" />
+                        <Input id="address2" value={billingData.address2} onChange={handleBillingChange} className="h-12" />
                     </div>
                 </div>
             </section>
 
-            <div className="pt-6">
-                <Button size="lg" className="bg-black hover:bg-slate-800 text-white min-w-[200px] h-12 text-base" onClick={handleSave}>
-                    Save Changes
-                </Button>
-            </div>
+            {/* Payment Method Section */}
+            <section className="space-y-6">
+                <div>
+                    <h3 className="text-xl font-bold mb-2">Payment Card</h3>
+                    <p className="text-sm text-muted-foreground">
+                        Please provide your credit/ debit card. Unless agreed otherwise, you will be charged upon sending an order to production.
+                    </p>
+                </div>
 
+                {!paymentMethod ? (
+                    <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+                        <DialogTrigger asChild>
+                            <div className="border-2 border-dashed border-slate-300 rounded-xl p-10 flex flex-col items-center justify-center cursor-pointer hover:border-black hover:bg-slate-50 transition-all group h-[200px]">
+                                <div className="h-12 w-12 bg-slate-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <CreditCard className="h-6 w-6 text-slate-500" />
+                                </div>
+                                <h4 className="font-bold text-lg text-slate-700">Add a credit/debit card</h4>
+                                <p className="text-sm text-slate-500 mt-1">Click to add payment method</p>
+                            </div>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Add Payment Method</DialogTitle>
+                                <DialogDescription>Enter your card details securely.</DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="holder">Card Holder Name</Label>
+                                    <Input id="holder" placeholder="John Doe" value={newCard.holderName} onChange={(e) => setNewCard({ ...newCard, holderName: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="number">Card Number</Label>
+                                    <Input id="number" placeholder="0000 0000 0000 0000" maxLength={19} value={newCard.cardNumber} onChange={(e) => setNewCard({ ...newCard, cardNumber: e.target.value })} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="expiry">Expiry (MM/YY)</Label>
+                                        <Input id="expiry" placeholder="MM/YY" maxLength={5} value={newCard.expiry} onChange={(e) => setNewCard({ ...newCard, expiry: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="cvv">CVV</Label>
+                                        <Input id="cvv" placeholder="123" maxLength={4} type="password" value={newCard.cvv} onChange={(e) => setNewCard({ ...newCard, cvv: e.target.value })} />
+                                    </div>
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button onClick={handleAddCard} className="bg-black text-white hover:bg-slate-800">Add Card</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                ) : (
+                    <div className="border border-slate-200 rounded-xl p-6 flex items-center justify-between bg-white shadow-sm">
+                        <div className="flex items-center gap-4">
+                            <div className="h-12 w-16 bg-blue-50 border border-blue-100 rounded-md flex items-center justify-center">
+                                <span className="font-bold text-blue-700 italic">VISA</span>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-slate-900">Visa ending in {paymentMethod.last4}</h4>
+                                <p className="text-sm text-slate-500">Expires {paymentMethod.expiry} • {paymentMethod.holder}</p>
+                            </div>
+                        </div>
+                        <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={handleRemoveCard}>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Remove
+                        </Button>
+                    </div>
+                )}
+            </section>
+
+            <div className="pt-6 border-t">
+                <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                        <h4 className="font-medium">Account Status</h4>
+                        <div className="flex items-center gap-2">
+                            {isSetupComplete() ? (
+                                <span className="flex items-center text-sm font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-200">
+                                    <CheckCircle2 className="h-4 w-4 mr-1" /> Complete
+                                </span>
+                            ) : (
+                                <span className="text-sm font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full border border-amber-200">Processing Setup</span>
+                            )}
+                        </div>
+                    </div>
+
+                    <Button size="lg" className="bg-black hover:bg-slate-800 text-white min-w-[200px] h-12 text-base" onClick={handleSave}>
+                        Save Changes
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 }
