@@ -39,7 +39,16 @@ type Order = {
     product: string;
     totalPrice: number;
     status: "New" | "In Production" | "On Hold" | "Shipped" | "Cancelled" | "Other";
+    userEmail?: string; // Add ownership
 };
+
+// Keep existing ORDERS as a fallback/demo for the main admin/demo user if needed, 
+// or simpler: just start empty for new users.
+const DEMO_ORDERS: Order[] = [
+    { id: "1", orderId: "ORD-001235", date: "2025-12-07T10:00:00", designImage: "/placeholder-design-1.jpg", deliveryName: "John Doe", product: "Custom Wallpaper (120x250 cm)", totalPrice: 135.00, status: "In Production", userEmail: "sogutlumesut@gmail.com" },
+    { id: "2", orderId: "ORD-001234", date: "2025-12-06T14:30:00", designImage: "/placeholder-design-2.jpg", deliveryName: "Jane Smith", product: "Canvas Print (50x70 cm)", totalPrice: 45.00, status: "Shipped", userEmail: "sogutlumesut@gmail.com" },
+    { id: "3", orderId: "ORD-001233", date: "2025-12-05T09:15:00", designImage: "/placeholder-design-3.jpg", deliveryName: "Robert Brown", product: "Peel & Stick Sample", totalPrice: 5.00, status: "New", userEmail: "sogutlumesut@gmail.com" },
+];
 
 const ORDERS: Order[] = [
     { id: "1", orderId: "ORD-001235", date: "2025-12-07T10:00:00", designImage: "/placeholder-design-1.jpg", deliveryName: "John Doe", product: "Custom Wallpaper (120x250 cm)", totalPrice: 135.00, status: "In Production" },
@@ -51,15 +60,65 @@ const ORDERS: Order[] = [
 ];
 
 export function OrdersTable() {
+    const [orders, setOrders] = React.useState<Order[]>([]);
+    const [currentUser, setCurrentUser] = React.useState<any>(null);
     const [statusFilter, setStatusFilter] = React.useState("All Orders");
     const [searchQuery, setSearchQuery] = React.useState("");
     const [date, setDate] = React.useState<Date | undefined>(undefined);
     const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
 
+    React.useEffect(() => {
+        // 1. Get User
+        const session = localStorage.getItem("user_session");
+        let userEmail = "";
+        if (session) {
+            try {
+                const userData = JSON.parse(session);
+                setCurrentUser(userData);
+                userEmail = userData.email;
+            } catch (e) {
+                console.error("Failed to parse user session");
+            }
+        }
+
+        // 2. Get Orders (Mock)
+        // Check if we have orders in local storage, if not, verify if we should seed demo orders
+        const storedOrders = localStorage.getItem("mock_orders");
+        let allOrders: Order[] = [];
+
+        if (storedOrders) {
+            try {
+                allOrders = JSON.parse(storedOrders);
+            } catch (e) { console.error("Failed to parse mock orders"); }
+        } else {
+            // Seed demo orders for the first time
+            // In a real app we wouldn't do this, but for this prototype let's save them
+            // so we don't lose the demo look for the main user
+            localStorage.setItem("mock_orders", JSON.stringify(DEMO_ORDERS));
+            allOrders = DEMO_ORDERS;
+        }
+
+        // 3. Filter by User
+        // If user is logged in, show ONLY their orders
+        if (userEmail) {
+            // For the demo purpose, if the user matches our "demo admin" (sogutlumesut@gmail.com), show demo orders.
+            // For everyone else (e.g. "dudu"), show only orders that match their email.
+            // Since DEMO_ORDERS have 'sogutlumesut@gmail.com', new users will see existing matching orders 
+            // OR empty if they haven't created any.
+
+            // Note: Since new registered users don't have orders yet, this will result in an empty list, which is CORRECT.
+            const userOrders = allOrders.filter(o => o.userEmail === userEmail);
+            setOrders(userOrders);
+        } else {
+            setOrders([]);
+        }
+
+    }, []);
+
     // Calculate Status Counts
     const statusCounts = React.useMemo(() => {
         const counts: Record<string, number> = {
-            "All Orders": ORDERS.length,
+            "All Orders": orders.length,
             "New": 0,
             "In Production": 0,
             "On Hold": 0,
@@ -67,7 +126,7 @@ export function OrdersTable() {
             "Cancelled": 0,
             "Other": 0
         };
-        ORDERS.forEach(order => {
+        orders.forEach(order => {
             if (counts[order.status] !== undefined) {
                 counts[order.status]++;
             } else {
@@ -75,9 +134,9 @@ export function OrdersTable() {
             }
         });
         return counts;
-    }, []);
+    }, [orders]);
 
-    const filteredOrders = ORDERS.filter(order => {
+    const filteredOrders = orders.filter(order => {
         // ... existing filter logic
         if (statusFilter !== "All Orders" && order.status !== statusFilter) return false;
 
@@ -211,7 +270,7 @@ export function OrdersTable() {
                     {/* Pagination */}
                     <div className="border-t p-4 flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">
-                            Showing {filteredOrders.length} of {ORDERS.length} orders
+                            Showing {filteredOrders.length} of {orders.length} orders
                         </div>
                         <div className="flex items-center gap-2">
                             <Button variant="outline" size="sm" disabled>Previous</Button>

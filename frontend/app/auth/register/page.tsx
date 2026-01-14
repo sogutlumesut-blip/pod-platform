@@ -1,16 +1,26 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Zap, Loader2 } from "lucide-react";
+import { Zap, Loader2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 export default function RegisterPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [countryCode, setCountryCode] = useState("+1");
 
     // Form State
     const [formData, setFormData] = useState({
@@ -82,7 +92,7 @@ export default function RegisterPage() {
 
             toast({
                 title: "Account Created!",
-                description: "Welcome to PrintMarkt.",
+                description: "Welcome to PrintMarkt. (Demo Mode: No email sent)",
             });
 
             router.push("/dashboard");
@@ -172,11 +182,25 @@ export default function RegisterPage() {
                         </div>
 
                         {/* Phone Number */}
-                        <div className="relative border border-slate-300 rounded-md flex items-center h-12 px-3 focus-within:ring-1 focus-within:ring-black">
-                            {/* Simplified Country Selector Mock */}
-                            <div className="flex items-center gap-1 border-r pr-2 mr-2">
-                                <span className="text-xl">🇺🇸</span>
-                                <span className="text-sm font-medium">+1</span>
+                        <div className="relative border border-slate-300 rounded-md flex items-center h-12 focus-within:ring-1 focus-within:ring-black">
+                            <div className="border-r h-full flex items-center">
+                                <Select defaultValue="+1" onValueChange={setCountryCode}>
+                                    <SelectTrigger className="w-[90px] h-full border-0 rounded-none focus:ring-0 shadow-none px-2 bg-transparent">
+                                        <SelectValue placeholder="+1" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="+1">🇺🇸 +1</SelectItem>
+                                        <SelectItem value="+44">🇬🇧 +44</SelectItem>
+                                        <SelectItem value="+90">🇹🇷 +90</SelectItem>
+                                        <SelectItem value="+49">🇩🇪 +49</SelectItem>
+                                        <SelectItem value="+33">🇫🇷 +33</SelectItem>
+                                        <SelectItem value="+31">🇳🇱 +31</SelectItem>
+                                        <SelectItem value="+39">🇮🇹 +39</SelectItem>
+                                        <SelectItem value="+34">🇪🇸 +34</SelectItem>
+                                        <SelectItem value="+61">🇦🇺 +61</SelectItem>
+                                        <SelectItem value="+1-CA">🇨🇦 +1</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <input
                                 id="phone"
@@ -185,9 +209,9 @@ export default function RegisterPage() {
                                 placeholder="Phone number"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                className="flex-1 bg-transparent border-0 focus:ring-0 text-sm outline-none placeholder:text-slate-400"
+                                className="flex-1 bg-transparent border-0 focus:ring-0 text-sm outline-none placeholder:text-slate-400 px-3 h-full"
                             />
-                            <label htmlFor="phone" className="absolute left-3 -top-2.5 bg-white px-1 text-xs font-bold text-slate-500">
+                            <label htmlFor="phone" className="absolute left-1 -top-2.5 bg-white px-1 text-xs font-bold text-slate-500 z-10">
                                 PHONE NUMBER
                             </label>
                         </div>
@@ -198,7 +222,7 @@ export default function RegisterPage() {
                                 <input
                                     id="password"
                                     name="password"
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     required
                                     placeholder=" "
                                     value={formData.password}
@@ -208,13 +232,24 @@ export default function RegisterPage() {
                                 <label htmlFor="password" className="absolute left-3 top-1 text-xs text-uppercase font-bold text-slate-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal peer-focus:top-1 peer-focus:text-xs peer-focus:font-bold">
                                     PASSWORD *
                                 </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600 focus:outline-none"
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="h-5 w-5" />
+                                    ) : (
+                                        <Eye className="h-5 w-5" />
+                                    )}
+                                </button>
                             </div>
 
                             <div className="relative">
                                 <input
                                     id="confirmPassword"
                                     name="confirmPassword"
-                                    type="password"
+                                    type={showConfirmPassword ? "text" : "password"}
                                     required
                                     placeholder=" "
                                     value={formData.confirmPassword}
@@ -224,6 +259,17 @@ export default function RegisterPage() {
                                 <label htmlFor="confirmPassword" className="absolute left-3 top-1 text-xs text-uppercase font-bold text-slate-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal peer-focus:top-1 peer-focus:text-xs peer-focus:font-bold">
                                     CONFIRM PASSWORD *
                                 </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600 focus:outline-none"
+                                >
+                                    {showConfirmPassword ? (
+                                        <EyeOff className="h-5 w-5" />
+                                    ) : (
+                                        <Eye className="h-5 w-5" />
+                                    )}
+                                </button>
                             </div>
                         </div>
 
