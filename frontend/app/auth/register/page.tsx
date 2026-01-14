@@ -74,6 +74,7 @@ export default function RegisterPage() {
                 name: formData.fullName,
                 email: formData.email,
                 phone: formData.phone,
+                countryCode: countryCode,
                 role: 'customer',
                 date: new Date().toISOString(),
                 status: 'active'
@@ -88,7 +89,9 @@ export default function RegisterPage() {
                 provider: 'email',
                 email: formData.email,
                 name: formData.fullName,
-                phone: formData.phone
+                phone: formData.phone,
+                countryCode: countryCode,
+                storeName: "" // Initialize empty storeName
             }));
 
             toast({

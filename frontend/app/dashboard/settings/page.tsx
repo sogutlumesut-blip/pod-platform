@@ -45,11 +45,14 @@ export default function SettingsPage() {
                     ...prev,
                     fullName: userData.name || "",
                     email: userData.email || "",
-                    phone: userData.phone || ""
+                    phone: userData.phone || "",
+                    storeName: userData.storeName || ""
                 }));
-                // Try to parse country code from phone or default
-                if (userData.phone && userData.phone.startsWith("+")) {
-                    // unexpected simple parsing logic if needed, or just keep manual
+                // Load saved country code or default to +1
+                if (userData.countryCode) {
+                    setCountryCode(userData.countryCode);
+                } else if (!userData.countryCode && userData.phone && userData.phone.startsWith("+")) {
+                    // Fallback: If no countryCode but phone has +, try to guess (optional, keeping simple for now)
                 }
             } catch (e) {
                 console.error("Failed to parse user session");
@@ -71,7 +74,9 @@ export default function SettingsPage() {
                 ...userData,
                 name: formData.fullName,
                 email: formData.email,
-                phone: formData.phone // In a real app we'd combine code + number
+                phone: formData.phone,
+                countryCode: countryCode,
+                storeName: formData.storeName
             };
             localStorage.setItem("user_session", JSON.stringify(updatedData));
 
