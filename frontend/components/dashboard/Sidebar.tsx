@@ -97,33 +97,31 @@ export function Sidebar() {
             </nav>
 
             <div className="p-4 border-t">
-                <div className="p-4 border-t">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <button className={cn("flex items-center gap-3 w-full hover:bg-muted p-2 rounded-md transition-colors text-left", collapsed ? "justify-center" : "")}>
-                                <div className="h-8 w-8 min-w-8 rounded-full bg-muted flex items-center justify-center overflow-hidden border">
-                                    <span className="font-bold text-xs">{user.name.charAt(0).toUpperCase()}</span>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className={cn("flex items-center gap-3 w-full hover:bg-muted p-2 rounded-md transition-colors text-left", collapsed ? "justify-center" : "")}>
+                            <div className="h-8 w-8 min-w-8 rounded-full bg-muted flex items-center justify-center overflow-hidden border">
+                                <span className="font-bold text-xs">{user.name.charAt(0).toUpperCase()}</span>
+                            </div>
+                            {!collapsed && (
+                                <div className="flex flex-col overflow-hidden leading-none">
+                                    <span className="text-sm font-medium truncate">{user.name}</span>
+                                    <span className="text-xs text-muted-foreground truncate">{user.email}</span>
                                 </div>
-                                {!collapsed && (
-                                    <div className="flex flex-col overflow-hidden leading-none">
-                                        <span className="text-sm font-medium truncate">{user.name}</span>
-                                        <span className="text-xs text-muted-foreground truncate">{user.email}</span>
-                                    </div>
-                                )}
-                                {!collapsed && <LogOut className="ml-auto h-4 w-4 text-muted-foreground" />}
-                            </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[200px]">
-                            <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer" onClick={() => {
-                                localStorage.removeItem("user_session");
-                                window.location.href = "/auth/login";
-                            }}>
-                                <LogOut className="mr-2 h-4 w-4" />
-                                Log out
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                            )}
+                            {!collapsed && <LogOut className="ml-auto h-4 w-4 text-muted-foreground" />}
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[200px]">
+                        <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer" onClick={() => {
+                            localStorage.removeItem("user_session");
+                            window.location.href = "/auth/login";
+                        }}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Log out
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </div>
     );
