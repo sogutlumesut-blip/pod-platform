@@ -324,7 +324,7 @@ export default function RegisterPage() {
                                 htmlFor="terms"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-600"
                             >
-                                I agree to the <Link href="/terms" className="text-[#FF6B55] underline">Terms and Conditions</Link> and <Link href="/privacy" className="text-[#FF6B55] underline">Privacy Policy</Link> <span className="text-xs text-gray-300">(v1.1)</span>
+                                I agree to the <Link href="/terms" className="text-[#FF6B55] underline">Terms and Conditions</Link> and <Link href="/privacy" className="text-[#FF6B55] underline">Privacy Policy</Link>
                             </label>
                         </div>
 
