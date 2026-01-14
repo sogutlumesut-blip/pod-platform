@@ -137,21 +137,58 @@ export default function SettingsPage() {
                     <div className="space-y-2">
                         <Label htmlFor="phone" className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Phone Number</Label>
                         <div className="relative flex">
-                            <div className="h-12 w-[80px] border rounded-l-md flex items-center justify-center bg-muted/20 border-r-0">
+                            <div className="h-12 w-[120px] border rounded-l-md flex items-center justify-center bg-muted/20 border-r-0">
                                 <Select defaultValue="+1" onValueChange={setCountryCode}>
-                                    <SelectTrigger className="w-full h-full border-0 rounded-none focus:ring-0 shadow-none px-1 bg-transparent justify-center">
+                                    <SelectTrigger className="w-[120px] h-full border-0 rounded-none focus:ring-0 shadow-none px-1 bg-transparent justify-center">
                                         <SelectValue placeholder="+1" />
                                     </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="+1">🇺🇸 +1</SelectItem>
-                                        <SelectItem value="+44">🇬🇧 +44</SelectItem>
-                                        <SelectItem value="+90">🇹🇷 +90</SelectItem>
-                                        <SelectItem value="+49">🇩🇪 +49</SelectItem>
-                                        <SelectItem value="+33">🇫🇷 +33</SelectItem>
-                                        <SelectItem value="+31">🇳🇱 +31</SelectItem>
-                                        <SelectItem value="+39">🇮🇹 +39</SelectItem>
-                                        <SelectItem value="+34">🇪🇸 +34</SelectItem>
-                                        <SelectItem value="+61">🇦🇺 +61</SelectItem>
+                                    <SelectContent className="h-[200px]">
+                                        <SelectItem value="+1">🇺🇸 US (+1)</SelectItem>
+                                        <SelectItem value="+44">🇬🇧 UK (+44)</SelectItem>
+                                        <SelectItem value="+90">🇹🇷 TR (+90)</SelectItem>
+                                        <SelectItem value="+49">🇩🇪 DE (+49)</SelectItem>
+                                        <SelectItem value="+33">🇫🇷 FR (+33)</SelectItem>
+                                        <SelectItem value="+39">🇮🇹 IT (+39)</SelectItem>
+                                        <SelectItem value="+34">🇪🇸 ES (+34)</SelectItem>
+                                        <SelectItem value="+31">🇳🇱 NL (+31)</SelectItem>
+                                        <SelectItem value="+61">🇦🇺 AU (+61)</SelectItem>
+                                        <SelectItem value="+1-CA">🇨🇦 CA (+1)</SelectItem>
+                                        <SelectItem value="+86">🇨🇳 CN (+86)</SelectItem>
+                                        <SelectItem value="+81">🇯🇵 JP (+81)</SelectItem>
+                                        <SelectItem value="+82">🇰🇷 KR (+82)</SelectItem>
+                                        <SelectItem value="+91">🇮🇳 IN (+91)</SelectItem>
+                                        <SelectItem value="+7">🇷🇺 RU (+7)</SelectItem>
+                                        <SelectItem value="+55">🇧🇷 BR (+55)</SelectItem>
+                                        <SelectItem value="+52">🇲🇽 MX (+52)</SelectItem>
+                                        <SelectItem value="+27">🇿🇦 ZA (+27)</SelectItem>
+                                        <SelectItem value="+41">🇨🇭 CH (+41)</SelectItem>
+                                        <SelectItem value="+46">🇸🇪 SE (+46)</SelectItem>
+                                        <SelectItem value="+47">🇳🇴 NO (+47)</SelectItem>
+                                        <SelectItem value="+45">🇩🇰 DK (+45)</SelectItem>
+                                        <SelectItem value="+358">🇫🇮 FI (+358)</SelectItem>
+                                        <SelectItem value="+32">🇧🇪 BE (+32)</SelectItem>
+                                        <SelectItem value="+48">🇵🇱 PL (+48)</SelectItem>
+                                        <SelectItem value="+43">🇦🇹 AT (+43)</SelectItem>
+                                        <SelectItem value="+351">🇵🇹 PT (+351)</SelectItem>
+                                        <SelectItem value="+30">🇬🇷 GR (+30)</SelectItem>
+                                        <SelectItem value="+420">🇨🇿 CZ (+420)</SelectItem>
+                                        <SelectItem value="+36">🇭🇺 HU (+36)</SelectItem>
+                                        <SelectItem value="+40">🇷🇴 RO (+40)</SelectItem>
+                                        <SelectItem value="+971">🇦🇪 AE (+971)</SelectItem>
+                                        <SelectItem value="+966">🇸🇦 SA (+966)</SelectItem>
+                                        <SelectItem value="+20">🇪🇬 EG (+20)</SelectItem>
+                                        <SelectItem value="+972">🇮🇱 IL (+972)</SelectItem>
+                                        <SelectItem value="+65">🇸🇬 SG (+65)</SelectItem>
+                                        <SelectItem value="+60">🇲🇾 MY (+60)</SelectItem>
+                                        <SelectItem value="+62">🇮🇩 ID (+62)</SelectItem>
+                                        <SelectItem value="+66">🇹🇭 TH (+66)</SelectItem>
+                                        <SelectItem value="+84">🇻🇳 VN (+84)</SelectItem>
+                                        <SelectItem value="+63">🇵🇭 PH (+63)</SelectItem>
+                                        <SelectItem value="+54">🇦🇷 AR (+54)</SelectItem>
+                                        <SelectItem value="+57">🇨🇴 CO (+57)</SelectItem>
+                                        <SelectItem value="+56">🇨🇱 CL (+56)</SelectItem>
+                                        <SelectItem value="+51">🇵🇪 PE (+51)</SelectItem>
+                                        <SelectItem value="+64">🇳🇿 NZ (+64)</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
