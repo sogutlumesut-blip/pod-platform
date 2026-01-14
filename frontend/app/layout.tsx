@@ -20,6 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(inter.className, "min-h-screen bg-background font-sans antialiased")}>
+        <div className="bg-red-600 text-white text-center text-sm font-bold p-1">
+          DEBUG MODE: v1.2 - IF YOU SEE THIS, DEPLOYMENT IS SUCCESSFUL
+        </div>
         {children}
         <Toaster />
       </body>
