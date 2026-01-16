@@ -183,8 +183,8 @@ export default function BillingPage() {
             <section className="space-y-6">
 
                 {/* No Invoices Banner */}
-                <div className="bg-[#FFF8F0] dark:bg-amber-900/10 p-6 rounded-lg flex items-start gap-4">
-                    <div className="bg-[#FF6B55] rounded-full p-1 mt-0.5 shrink-0">
+                <div className="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-lg flex items-start gap-4">
+                    <div className="bg-blue-500 rounded-full p-1 mt-0.5 shrink-0">
                         <Info className="h-4 w-4 text-white" strokeWidth={3} />
                     </div>
                     <div className="space-y-1">

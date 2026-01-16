@@ -35,8 +35,11 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 
+import { useRouter } from "next/navigation";
+
 export default function SettingsPage() {
     const { toast } = useToast();
+    const router = useRouter();
     const [countryCode, setCountryCode] = useState("+1");
 
     // Form State
@@ -60,13 +63,6 @@ export default function SettingsPage() {
 
     // Payment State
     const [paymentMethod, setPaymentMethod] = useState<any>(null);
-    const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
-    const [newCard, setNewCard] = useState({
-        holderName: "",
-        cardNumber: "",
-        expiry: "",
-        cvv: ""
-    });
 
     // Validates if the "Account Setup" is complete
     const isSetupComplete = () => {
@@ -375,68 +371,22 @@ export default function SettingsPage() {
                 <div>
                     <h3 className="text-xl font-bold mb-2">Payment Card</h3>
                     <p className="text-sm text-muted-foreground">
-                        Please provide your credit/ debit card. Unless agreed otherwise, you will be charged upon sending an order to production.
+                        Manage your payment methods in the Billing tab.
                     </p>
                 </div>
 
-                {!paymentMethod ? (
-                    <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-                        <DialogTrigger asChild>
-                            <div className="border-2 border-dashed border-slate-300 rounded-xl p-10 flex flex-col items-center justify-center cursor-pointer hover:border-black hover:bg-slate-50 transition-all group h-[200px]">
-                                <div className="h-12 w-12 bg-slate-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                    <CreditCard className="h-6 w-6 text-slate-500" />
-                                </div>
-                                <h4 className="font-bold text-lg text-slate-700">Add a credit/debit card</h4>
-                                <p className="text-sm text-slate-500 mt-1">Click to add payment method</p>
-                            </div>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Add Payment Method</DialogTitle>
-                                <DialogDescription>Enter your card details securely.</DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="holder">Card Holder Name</Label>
-                                    <Input id="holder" placeholder="John Doe" value={newCard.holderName} onChange={(e) => setNewCard({ ...newCard, holderName: e.target.value })} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="number">Card Number</Label>
-                                    <Input id="number" placeholder="0000 0000 0000 0000" maxLength={19} value={newCard.cardNumber} onChange={(e) => setNewCard({ ...newCard, cardNumber: e.target.value })} />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="expiry">Expiry (MM/YY)</Label>
-                                        <Input id="expiry" placeholder="MM/YY" maxLength={5} value={newCard.expiry} onChange={(e) => setNewCard({ ...newCard, expiry: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="cvv">CVV</Label>
-                                        <Input id="cvv" placeholder="123" maxLength={4} type="password" value={newCard.cvv} onChange={(e) => setNewCard({ ...newCard, cvv: e.target.value })} />
-                                    </div>
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button onClick={handleAddCard} className="bg-black text-white hover:bg-slate-800">Add Card</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                ) : (
-                    <div className="border border-slate-200 rounded-xl p-6 flex items-center justify-between bg-white shadow-sm">
-                        <div className="flex items-center gap-4">
-                            <div className="h-12 w-16 bg-blue-50 border border-blue-100 rounded-md flex items-center justify-center">
-                                <span className="font-bold text-blue-700 italic">VISA</span>
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-slate-900">Visa ending in {paymentMethod.last4}</h4>
-                                <p className="text-sm text-slate-500">Expires {paymentMethod.expiry} • {paymentMethod.holder}</p>
-                            </div>
+                <div className="border border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center bg-slate-50 gap-4">
+                    <p className="text-muted-foreground text-sm">To add or remove cards, please visit the Billing settings.</p>
+                    <Button variant="outline" onClick={() => router.push('/dashboard/settings/billing')}>
+                        Go to Billing
+                    </Button>
+                    {paymentMethod && (
+                        <div className="flex items-center gap-2 mt-2 bg-white px-4 py-2 rounded-md border text-sm">
+                            <CreditCard className="h-4 w-4 text-slate-500" />
+                            <span className="font-medium">Visa ending in {paymentMethod.last4}</span>
                         </div>
-                        <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={handleRemoveCard}>
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Remove
-                        </Button>
-                    </div>
-                )}
+                    )}
+                </div>
             </section>
 
             <div className="pt-6 border-t">
