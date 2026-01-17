@@ -10,6 +10,11 @@ class User(SQLModel, table=True):
     is_active: bool = Field(default=False)
     is_admin: bool = Field(default=False)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Custom Pricing
+    discount_percentage: float = Field(default=0.0)
+    custom_pricing_json: Optional[str] = Field(default=None) # JSON string: {"material_id": unit_price_float}
+    allow_on_account_payment: bool = Field(default=False)
 
 class Order(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -56,6 +61,16 @@ class SiteConfig(SQLModel, table=True):
     group: str = Field(default="general") # e.g., "home.hero", "home.features"
     type: str = Field(default="text") # "text", "image", "json"
     label: str # User-friendly label for the admin UI
+
+class Payment(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    order_id: int = Field(foreign_key="order.id")
+    amount: float
+    currency: str = Field(default="USD")
+    method: str = Field(default="credit_card") # credit_card, paypal
+    status: str = Field(default="pending") # pending, completed, failed
+    transaction_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Store(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)

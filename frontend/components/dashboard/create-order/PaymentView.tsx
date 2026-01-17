@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CreditCard, Wallet } from "lucide-react";
+import { CreditCard, Wallet, FileText } from "lucide-react";
 import Image from "next/image";
 
 interface PaymentViewProps {
@@ -15,6 +15,25 @@ interface PaymentViewProps {
 
 export function PaymentView({ amount }: PaymentViewProps) {
     const [paymentMethod, setPaymentMethod] = useState("card");
+    const [canPayOnAccount, setCanPayOnAccount] = useState(false);
+
+    useEffect(() => {
+        // Fetch User Permission (Simulated for User ID 1)
+        const fetchPermission = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/admin/users/1');
+                if (response.ok) {
+                    const userData = await response.json();
+                    if (userData.allow_on_account_payment) {
+                        setCanPayOnAccount(true);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch user permission", error);
+            }
+        };
+        fetchPermission();
+    }, []);
 
     return (
         <div className="grid gap-8 max-w-4xl mx-auto">
@@ -27,13 +46,18 @@ export function PaymentView({ amount }: PaymentViewProps) {
                 {/* Payment Methods */}
                 <div>
                     <Tabs defaultValue="card" className="w-full" onValueChange={setPaymentMethod}>
-                        <TabsList className="grid w-full grid-cols-2 mb-6 h-14">
+                        <TabsList className={`grid w-full h-14 mb-6 ${canPayOnAccount ? 'grid-cols-3' : 'grid-cols-2'}`}>
                             <TabsTrigger value="card" className="h-full gap-2 text-base">
                                 <CreditCard className="h-4 w-4" /> Credit Card
                             </TabsTrigger>
                             <TabsTrigger value="paypal" className="h-full gap-2 text-base">
                                 <Wallet className="h-4 w-4" /> PayPal
                             </TabsTrigger>
+                            {canPayOnAccount && (
+                                <TabsTrigger value="account" className="h-full gap-2 text-base">
+                                    <FileText className="h-4 w-4" /> Current Account
+                                </TabsTrigger>
+                            )}
                         </TabsList>
 
                         {/* Credit Card Form */}
@@ -84,6 +108,32 @@ export function PaymentView({ amount }: PaymentViewProps) {
                                     <p className="text-sm text-muted-foreground max-w-xs">
                                         Connect your PayPal account for a fast and secure checkout experience.
                                     </p>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        {/* Current Account Info */}
+                        <TabsContent value="account">
+                            <Card className="border-blue-200 bg-blue-50/30">
+                                <CardHeader>
+                                    <CardTitle className="text-blue-900">Current Account Payment</CardTitle>
+                                    <CardDescription className="text-blue-700">
+                                        Place order now and pay later via your agreed payment terms.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="bg-white p-4 rounded-lg border border-blue-100 flex items-start gap-3">
+                                        <div className="p-2 bg-blue-100 rounded-full">
+                                            <FileText className="h-5 w-5 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium text-slate-900">Payment on Account</h4>
+                                            <p className="text-sm text-slate-500 mt-1">
+                                                By proceeding, you confirm that this order will be billed to your current account.
+                                                Invoice will be sent to your registered email.
+                                            </p>
+                                        </div>
+                                    </div>
                                 </CardContent>
                             </Card>
                         </TabsContent>

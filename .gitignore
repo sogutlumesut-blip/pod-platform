@@ -2,8 +2,10 @@ brain/
 .DS_Store
 *.log
 venv/
+.venv/
 node_modules/
 .env
 .env.local
 __pycache__/
 .pytest_cache/
+database.db

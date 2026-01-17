@@ -11,7 +11,8 @@ import {
     BookOpen,
     Settings,
     ChevronLeft,
-    LogOut
+    LogOut,
+    Users
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -37,23 +38,30 @@ const sidebarItems = [
 export function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
-    const [user, setUser] = useState<{ name: string, email: string }>({ name: "User Name", email: "user@example.com" });
+    const [user, setUser] = useState<{ name: string, email: string, is_admin: boolean }>({
+        name: "User Name",
+        email: "user@example.com",
+        is_admin: false
+    });
 
     useEffect(() => {
-        const session = localStorage.getItem("user_session");
-        if (session) {
+        // Fetch User Data (Simulating User ID 1 - In production would use /api/me)
+        const fetchUser = async () => {
             try {
-                const userData = JSON.parse(session);
-                if (userData) {
+                const response = await fetch('http://localhost:8000/admin/users/1');
+                if (response.ok) {
+                    const userData = await response.json();
                     setUser({
-                        name: userData.name || "User Name",
-                        email: userData.email || "user@example.com"
+                        name: userData.full_name || "User Name",
+                        email: userData.email || "user@example.com",
+                        is_admin: userData.is_admin || false
                     });
                 }
             } catch (e) {
-                console.error("Failed to parse user session");
+                console.error("Failed to fetch user data");
             }
-        }
+        };
+        fetchUser();
     }, []);
 
     return (
@@ -94,6 +102,23 @@ export function Sidebar() {
                         {!collapsed && <span>{item.label}</span>}
                     </Link>
                 ))}
+
+                {/* Admin Only Links */}
+                {user.is_admin && (
+                    <Link
+                        href="/dashboard/customers"
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap",
+                            pathname === "/dashboard/customers"
+                                ? "text-primary bg-primary/10"
+                                : "text-blue-600 hover:text-blue-700 hover:bg-blue-50",
+                            collapsed && "justify-center px-2"
+                        )}
+                    >
+                        <Users className="h-5 w-5 min-w-5" />
+                        {!collapsed && <span>Customers (Admin)</span>}
+                    </Link>
+                )}
             </nav>
 
             <div className="p-4 border-t">

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Search, Filter } from "lucide-react";
+import { Calendar as CalendarIcon, Search, Filter, Plus } from "lucide-react";
 import {
     Popover,
     PopoverContent,
@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { StatusBadge } from "./StatusBadge";
 import Image from "next/image";
 import { OrderDetailsSheet } from "./OrderDetailsSheet";
+import { OrderConfigurationDialog } from "./OrderConfigurationDialog";
 
 // Mock Data
 type Order = {
@@ -66,6 +67,7 @@ export function OrdersTable() {
     const [searchQuery, setSearchQuery] = React.useState("");
     const [date, setDate] = React.useState<Date | undefined>(undefined);
     const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
+    const [isNewOrderDialogOpen, setIsNewOrderDialogOpen] = React.useState(false);
 
     React.useEffect(() => {
         // 1. Get User
@@ -217,6 +219,10 @@ export function OrdersTable() {
                         <Filter className="mr-2 h-4 w-4" />
                         More Filters
                     </Button>
+                    <Button className="bg-black text-white hover:bg-slate-800" onClick={() => setIsNewOrderDialogOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Order
+                    </Button>
                 </div>
 
                 {/* Table */}
@@ -284,6 +290,16 @@ export function OrdersTable() {
                 order={selectedOrder}
                 open={!!selectedOrder}
                 onOpenChange={(open) => !open && setSelectedOrder(null)}
+            />
+
+            <OrderConfigurationDialog
+                open={isNewOrderDialogOpen}
+                onOpenChange={setIsNewOrderDialogOpen}
+                currentOrderId={undefined}
+                onConfirm={(data) => {
+                    // Refresh orders or add new mock order
+                    console.log("Order confirmed with data:", data);
+                }}
             />
         </div>
     );

@@ -18,10 +18,11 @@ import Image from "next/image";
 // Mock Data for Textures
 // Mock Data for Textures
 const TEXTURES = [
-    { id: "t1", name: "Non-Woven Wallpaper", pricePerSqm: 25, image: "/placeholder-texture-1.jpg" },
-    { id: "t2", name: "Textured Vinyl", pricePerSqm: 35, image: "/placeholder-texture-2.jpg" },
-    { id: "t3", name: "Peel & Stick", pricePerSqm: 40, image: "/placeholder-texture-3.jpg" },
-    { id: "t4", name: "Canvas Fabric", pricePerSqm: 45, image: "/placeholder-texture-4.jpg" },
+    { id: "t1", name: "Non-Woven", pricePerSqm: 11, image: "/placeholder-texture-1.jpg" },
+    { id: "t2", name: "Textured", pricePerSqm: 13, image: "/placeholder-texture-2.jpg" },
+    { id: "t3", name: "Peel & Stick", pricePerSqm: 14, image: "/placeholder-texture-3.jpg" },
+    { id: "t4", name: "Deluxe Textile", pricePerSqm: 15, image: "/placeholder-texture-4.jpg" },
+    { id: "t5", name: "Canvas Peel & Stick", pricePerSqm: 18, image: "/placeholder-texture-4.jpg" },
 ];
 
 const SHIPPING_METHODS = [
@@ -46,6 +47,7 @@ export interface ProductData {
     shippingCost: number;
     productionMethod: 'upload' | 'link';
     productionExternalUrl: string;
+    note?: string;
 }
 
 interface ProductCalculatorProps {
