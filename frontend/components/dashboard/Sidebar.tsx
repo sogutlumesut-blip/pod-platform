@@ -23,6 +23,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { API_URL } from "@/lib/config";
 
 const sidebarItems = [
     { icon: Home, label: "Home", href: "/dashboard" },
@@ -48,7 +49,7 @@ export function Sidebar() {
         // Fetch User Data (Simulating User ID 1 - In production would use /api/me)
         const fetchUser = async () => {
             try {
-                const response = await fetch('http://localhost:8000/admin/users/1');
+                const response = await fetch(`${API_URL}/admin/users/1`);
                 if (response.ok) {
                     const userData = await response.json();
                     setUser({

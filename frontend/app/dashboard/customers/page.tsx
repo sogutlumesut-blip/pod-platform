@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Search, Loader2, Edit, DollarSign } from 'lucide-react';
 import { CustomerPricingDialog } from '@/components/admin/CustomerPricingDialog';
+import { API_URL } from "@/lib/config";
 
 interface User {
     id: number;
@@ -35,7 +36,7 @@ export default function CustomersPage() {
         const verifyAdmin = async () => {
             try {
                 // Mock Auth Check - User ID 1
-                const response = await fetch('http://localhost:8000/admin/users/1');
+                const response = await fetch(`${API_URL}/admin/users/1`);
                 if (response.ok) {
                     const currentUser = await response.json();
                     if (!currentUser.is_admin) {
@@ -54,7 +55,7 @@ export default function CustomersPage() {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch('http://localhost:8000/admin/users');
+            const response = await fetch(`${API_URL}/admin/users`);
             if (response.ok) {
                 const data = await response.json();
                 setUsers(data);

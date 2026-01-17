@@ -19,6 +19,8 @@ const TEXTURES = [
     { id: 'canvas-peel-stick', name: 'Canvas Peel & Stick', defaultPrice: 18 },
 ];
 
+import { API_URL } from "@/lib/config";
+
 interface User {
     id: number;
     full_name: string;
@@ -85,7 +87,7 @@ export function CustomerPricingDialog({ user, open, onOpenChange }: CustomerPric
                 allow_on_account_payment: allowOnAccount
             };
 
-            const response = await fetch(`http://localhost:8000/admin/users/${user.id}/pricing`, {
+            const response = await fetch(`${API_URL}/admin/users/${user.id}/pricing`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

@@ -8,6 +8,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { API_URL } from "@/lib/config";
 import { Upload, X, Link as LinkIcon } from "lucide-react"; // Removed unnecessary icons
 import { useRef, useEffect, useState, useCallback } from "react";
 import Image from "next/image";
@@ -51,7 +52,7 @@ export function ProductCalculatorWizard({ data, onChange }: ProductCalculatorWiz
         const fetchUserPricing = async () => {
             try {
                 // In a real app, this would be /api/me or derived from session
-                const response = await fetch('http://localhost:8000/admin/users/1');
+                const response = await fetch(`${API_URL}/admin/users/1`);
                 if (response.ok) {
                     const userData = await response.json();
                     if (userData.custom_pricing_json) {

@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard } from "lucide-react";
+import { CreditCard, AlertCircle } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 export default function PaymentSettingsPage() {
     const [loading, setLoading] = useState(false);
@@ -26,9 +27,9 @@ export default function PaymentSettingsPage() {
     }, []);
 
     const handleSave = async () => {
-        setLoading(true);
+        setSaving(true);
         try {
-            const res = await fetch("http://localhost:8000/admin/config/payment", {
+            const res = await fetch(`${API_URL}/admin/config/payment`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(config)

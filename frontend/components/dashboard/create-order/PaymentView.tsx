@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CreditCard, Wallet, FileText } from "lucide-react";
 import Image from "next/image";
+import { API_URL } from "@/lib/config";
 
 interface PaymentViewProps {
     amount: number;
@@ -21,7 +22,7 @@ export function PaymentView({ amount }: PaymentViewProps) {
         // Fetch User Permission (Simulated for User ID 1)
         const fetchPermission = async () => {
             try {
-                const response = await fetch('http://localhost:8000/admin/users/1');
+                const response = await fetch(`${API_URL}/admin/users/1`);
                 if (response.ok) {
                     const userData = await response.json();
                     if (userData.allow_on_account_payment) {
