@@ -1,6 +1,6 @@
 import { RecipientData } from "./RecipientForm";
 import { AddressData } from "./AddressForm";
-import { ProductData } from "../../ProductCalculatorV2";
+import { ProductData } from "../ProductCalculatorV2";
 import { Separator } from "@/components/ui/separator";
 
 interface OrderSummaryProps {

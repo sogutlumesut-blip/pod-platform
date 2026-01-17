@@ -24,6 +24,7 @@ interface OrderConfigurationDialogProps {
     onOpenChange: (open: boolean) => void;
     currentOrderId?: string;
     onConfirm: (orderData: any) => void;
+    orderId?: string | null;
 }
 
 const STEPS = ["Recipient", "Address", "Product", "Confirm", "Payment"];
@@ -33,6 +34,7 @@ export function OrderConfigurationDialog({
     onOpenChange,
     currentOrderId,
     onConfirm,
+    orderId,
 }: OrderConfigurationDialogProps) {
 
     const [step, setStep] = useState(1);
